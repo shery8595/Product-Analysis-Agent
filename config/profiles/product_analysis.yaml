@@ -1,0 +1,119 @@
+# Product Analysis Agent Profile
+# Optimized for competitive analysis workflows
+
+name: "product_analysis"
+description: "Specialized profile for competitive product analysis"
+
+# Runtime configuration
+runtime:
+  max_depth: 2
+  timeout: 300
+
+# Agent orchestration
+orchestration:
+  max_execution_steps: 10
+  max_recursion_depth: 2
+  enable_checkpoints: true
+  checkpoint_interval: 3
+  parallel_execution: true
+  max_parallel_tasks: 3
+
+# Agent configurations
+agents:
+  atomizer:
+    llm:
+      model: "openrouter/z-ai/glm-4.5-air:free"
+      temperature: 0.3
+      max_tokens: 2000
+      cache: true
+    prediction_strategy: "ChainOfThought"
+    enabled: true
+
+  planner:
+    llm:
+      model: "openrouter/z-ai/glm-4.5-air:free"
+      temperature: 0.4
+      max_tokens: 3000
+      cache: true
+    prediction_strategy: "ChainOfThought"
+    enabled: true
+    agent_config:
+      max_subtasks: 5
+      analysis_framework: "competitive_analysis"
+
+  executor:
+    llm:
+      model: "openrouter/z-ai/glm-4.5-air:free"
+      temperature: 0.5
+      max_tokens: 4000
+      cache: true
+    prediction_strategy: "react"
+    enabled: true
+    agent_config:
+      max_executions: 8
+      enable_web_search: true
+    
+    toolkits:
+      - class_name: FileToolkit
+        enabled: true
+        toolkit_config:
+          max_file_size_mb: 10
+
+      - class_name: MCPToolkit
+        enabled: true
+        toolkit_config:
+          server_name: exa
+          server_type: http
+          url: https://mcp.exa.ai/mcp
+          headers:
+            Authorization: Bearer ${oc.env:EXA_API_KEY}
+          transport_type: streamable
+          use_storage: false
+          tool_timeout: 60
+
+      - class_name: WebScraperToolkit
+        enabled: true
+        toolkit_config:
+          max_pages: 5
+          respect_robots_txt: true
+
+  aggregator:
+    llm:
+      model: "openrouter/z-ai/glm-4.5-air:free"
+      temperature: 0.2
+      max_tokens: 5000
+      cache: true
+    prediction_strategy: "ChainOfThought"
+    enabled: true
+    agent_config:
+      synthesis_method: "comparative_analysis"
+      output_format: "markdown"
+
+# Analysis-specific settings
+analysis:
+  max_competitors: 5
+  depth: "detailed"  # basic/detailed/comprehensive
+  include_pricing: true
+  include_feature_matrix: true
+  include_swot: true
+  output_sections:
+    - "executive_summary"
+    - "market_overview"
+    - "competitor_profiles"
+    - "feature_comparison"
+    - "strengths_weaknesses"
+    - "opportunities_threats"
+    - "strategic_recommendations"
+
+# Cost controls
+cost_tracking:
+  enabled: true
+  warn_threshold_usd: 0.0
+  stop_threshold_usd: 0.10
+
+# Performance optimization
+performance:
+  enable_async: true
+  request_timeout: 120
+  retry_attempts: 2
+  enable_circuit_breaker: true
